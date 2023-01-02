@@ -3,6 +3,10 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const Product = require("../models/products");
 
+/**
+ * todo make the result look better
+ */
+
 router.get("/", (req, res) => {
     Product.find()
         .exec()
