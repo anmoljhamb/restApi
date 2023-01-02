@@ -8,8 +8,13 @@ router.get("/", (req, res) => {
 });
 
 router.post("/", (req, res) => {
+    order = {
+        orderId: req.body.orderId,
+        quantity: req.body.quantity,
+    };
     res.status(201).json({
         message: "POST request for the url /orders",
+        order: order,
     });
 });
 
