@@ -1,42 +1,76 @@
 const express = require("express");
+const Order = require("../models/orders");
+const { default: mongoose } = require("mongoose");
 const router = express.Router();
 
 router.get("/", (req, res) => {
-    res.status(200).json({
-        message: "GET request for the url /orders",
-    });
+    Order.find()
+        .select("_id product quantity")
+        .populate("product", "_id name")
+        .exec()
+        .then((result) => {
+            res.status(200).json(result);
+        })
+        .catch((err) => {
+            res.status(500).json({ err });
+        });
 });
 
 router.post("/", (req, res) => {
-    order = {
-        orderId: req.body.orderId,
+    const order = new Order({
+        _id: mongoose.Types.ObjectId(),
+        product: req.body.productId,
         quantity: req.body.quantity,
-    };
-    res.status(201).json({
-        message: "POST request for the url /orders",
-        order: order,
     });
+    order
+        .save()
+        .then((result) => {
+            return result.populate("product", "_id name price");
+        })
+        .then((result) => {
+            res.status(201).json(result);
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).json({ err });
+        });
 });
 
 router.get("/:orderId", (req, res) => {
-    res.status(200).json({
-        message: "GET request for the url /orders/:orderId",
-        orderId: req.params.orderId,
-    });
+    Order.findById(req.params.orderId)
+        .populate("product", "_id name price")
+        .select("_id product quantity")
+        .exec()
+        .then((result) => {
+            if (result) return res.status(200).json(result);
+            res.status(404).json({ err: { message: "Record not found." } });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).json({ err });
+        });
 });
 
 router.patch("/:orderId", (req, res) => {
-    res.status(200).json({
-        message: "PATCH request for the url /orders/:orderId",
-        orderId: req.params.orderId,
-    });
+    Order.updateOne({ _id: req.params.orderId }, { $set: req.body })
+        .exec()
+        .then((result) => {
+            res.status(200).json(result);
+        })
+        .catch((err) => {
+            res.status(500).json({ err });
+        });
 });
 
 router.delete("/:orderId", (req, res) => {
-    res.status(200).json({
-        message: "DELETE request for the url /orders/:orderId",
-        orderId: req.params.orderId,
-    });
+    Order.remove({ _id: req.params.orderId })
+        .exec()
+        .then((result) => {
+            res.status(200).json(result);
+        })
+        .catch((err) => {
+            res.status(500).json({ err });
+        });
 });
 
 module.exports = router;
