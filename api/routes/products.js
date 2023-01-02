@@ -1,42 +1,75 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
+const Product = require("../models/products");
 
 router.get("/", (req, res) => {
-    res.status(200).json({
-        message: "GET request for the url /products",
-    });
+    Product.find()
+        .exec()
+        .then((result) => {
+            res.status(200).json(result);
+        })
+        .catch((err) => {
+            res.status(500).json(err);
+        });
 });
 
 router.post("/", (req, res) => {
-    product = {
-        productId: req.body.productId,
+    const product = new Product({
+        _id: mongoose.Types.ObjectId(),
+        name: req.body.name,
         price: req.body.price,
-    };
-    res.status(201).json({
-        message: "POST request for the url /products",
-        product: product,
     });
+    product
+        .save()
+        .then((result) => {
+            res.status(201).json({
+                message: "POST request for the url /products",
+                product: product,
+            });
+        })
+        .catch((err) => {
+            res.status(400).json({
+                err,
+            });
+        });
 });
 
 router.get("/:productId", (req, res) => {
-    res.status(200).json({
-        message: "GET request for the url /products/:productId",
-        productId: req.params.productId,
-    });
+    Product.findById(req.params.productId)
+        .exec()
+        .then((result) => {
+            if (result) return res.status(200).json(result);
+            res.status(404).json({
+                error: { message: "Requested not found." },
+            });
+        })
+        .catch((err) => {
+            res.status(500).json(err);
+        });
 });
 
 router.patch("/:productId", (req, res) => {
-    res.status(200).json({
-        message: "PATCH request for the url /products/:productId",
-        productId: req.params.productId,
-    });
+    console.log(req.body);
+    Product.updateOne({ _id: req.params.productId }, { $set: req.body })
+        .exec()
+        .then((result) => {
+            res.status(200).json(result);
+        })
+        .catch((err) => {
+            res.status(500).json(err);
+        });
 });
 
 router.delete("/:productId", (req, res) => {
-    res.status(200).json({
-        message: "DELETE request for the url /products/:productId",
-        productId: req.params.productId,
-    });
+    Product.remove({ _id: req.params.productId })
+        .exec()
+        .then((result) => {
+            res.status(200).json(result);
+        })
+        .catch((err) => {
+            res.status(500).json(err);
+        });
 });
 
 module.exports = router;

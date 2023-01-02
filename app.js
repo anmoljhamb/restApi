@@ -4,6 +4,17 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const productRouter = require("./api/routes/products");
 const orderRouter = require("./api/routes/orders");
+const path = require("path");
+const mongoose = require("mongoose");
+require("dotenv").config({ path: path.join(__dirname, "config.env") });
+
+mongoose.set("strictQuery", true);
+mongoose
+    .connect(process.env.DATABASE_URI)
+    .then(() => {
+        console.log("Database connected.");
+    })
+    .catch((err) => console.log(err));
 
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
