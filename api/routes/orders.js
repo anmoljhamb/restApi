@@ -2,6 +2,7 @@ const express = require("express");
 const Order = require("../models/orders");
 const { default: mongoose } = require("mongoose");
 const router = express.Router();
+const checkAuth = require("../middleware/checkAuth");
 
 router.get("/", (req, res) => {
     Order.find()
@@ -16,7 +17,8 @@ router.get("/", (req, res) => {
         });
 });
 
-router.post("/", (req, res) => {
+router.post("/", checkAuth, (req, res) => {
+    console.log("User: ", req.user);
     const order = new Order({
         _id: mongoose.Types.ObjectId(),
         product: req.body.productId,
@@ -51,7 +53,7 @@ router.get("/:orderId", (req, res) => {
         });
 });
 
-router.patch("/:orderId", (req, res) => {
+router.patch("/:orderId", checkAuth, (req, res) => {
     Order.updateOne({ _id: req.params.orderId }, { $set: req.body })
         .exec()
         .then((result) => {
@@ -62,7 +64,7 @@ router.patch("/:orderId", (req, res) => {
         });
 });
 
-router.delete("/:orderId", (req, res) => {
+router.delete("/:orderId", checkAuth, (req, res) => {
     Order.remove({ _id: req.params.orderId })
         .exec()
         .then((result) => {
