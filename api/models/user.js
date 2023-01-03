@@ -7,6 +7,7 @@ const userSchema = mongoose.Schema({
     },
     username: {
         type: String,
+        unique: true,
         required: true,
     },
     password: {
@@ -16,6 +17,7 @@ const userSchema = mongoose.Schema({
 });
 
 userSchema.pre("save", async function (next) {
+    // check if a username already exists or not. And if it does, return an error.
     console.log(this.password);
     console.log(this.username);
     next();
