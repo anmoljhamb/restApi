@@ -9,18 +9,24 @@ const userSchema = mongoose.Schema({
         type: String,
         unique: true,
         required: true,
+        validate: {
+            validator: async function (value) {
+                const result = await mongoose.models["User"]
+                    .findOne({
+                        username: value,
+                    })
+                    .exec();
+                return result == null;
+            },
+            message: (props) => {
+                return `Unique username required. The given username ${props.value}  already exists.`;
+            },
+        },
     },
     password: {
         type: String,
         required: true,
     },
-});
-
-userSchema.pre("save", async function (next) {
-    // check if a username already exists or not. And if it does, return an error.
-    console.log(this.password);
-    console.log(this.username);
-    next();
 });
 
 const User = mongoose.model("User", userSchema);
