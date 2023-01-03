@@ -1,8 +1,13 @@
 const express = require("express");
 const { default: mongoose } = require("mongoose");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const User = require("../models/users");
 const bcrypt = require("bcryptjs");
+const path = require("path");
+require("dotenv").config({
+    path: path.join(__dirname, "..", "..", "config.env"),
+});
 
 router.get("/", (req, res) => {
     User.find()
@@ -40,7 +45,16 @@ router.post("/login", (req, res) => {
                 return res
                     .status(400)
                     .json({ error: { message: "Wrong Password." } });
-            return res.status(200).json({ result });
+            const token = jwt.sign(
+                { _id: result._id, username: result.username },
+                process.env.SECRET_KEY,
+                {
+                    expiresIn: "1h",
+                }
+            );
+            return res
+                .status(200)
+                .json({ message: "Authentication Successful.", token });
         })
         .catch((err) => {
             res.status(400).json({ error: err });
