@@ -1,7 +1,7 @@
 const express = require("express");
 const { default: mongoose } = require("mongoose");
 const router = express.Router();
-const User = require("../models/user");
+const User = require("../models/users");
 
 router.get("/", (req, res) => {
     User.find()
